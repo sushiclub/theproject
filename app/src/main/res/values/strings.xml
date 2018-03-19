@@ -1,0 +1,8 @@
+<resources>
+    <string name="app_name">Beer Tome</string>
+    <string name="description">Description</string>
+    <string name="abv">ABV</string>
+    <string name="review">Review</string>
+    <string name="beer_name">Beer Name</string>
+    <string name="submit">Submit</string>
+</resources>
