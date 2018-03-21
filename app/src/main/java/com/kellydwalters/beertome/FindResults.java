@@ -33,9 +33,9 @@ import okhttp3.Request;
 import okhttp3.Response;
 
 public class FindResults extends AppCompatActivity {
-    private String apiURL = "http://api.brewerydb.com/v2/search?q=";
-    private String apiKey = "key=ba3c926f89626f68edeb102cb57f0a93";
-    private String apiSearchType = "&type=beer&";
+    private final String apiURL = "http://api.brewerydb.com/v2/search?q=";
+    private final String apiKey = "key=ba3c926f89626f68edeb102cb57f0a93";
+    private final String apiSearchType = "&type=beer&";
 
     private ListView mainListView ;
     private ArrayList<ListItem> item = new ArrayList<>();
@@ -101,6 +101,10 @@ public class FindResults extends AppCompatActivity {
             // image ['data'][i]['labels']['icon']
 
 
+            String name = "n/a";
+            String abv = "n/a";
+            String description = "n/a";
+
             // get Data json object
             JSONArray jsonData = reader.getJSONArray("data");
 
@@ -108,12 +112,22 @@ public class FindResults extends AppCompatActivity {
                 // get the main level of items
                 JSONObject c = jsonData.getJSONObject(i);
 
-                String name = c.getString("name");
-                String abv = c.getString("abv");
+                if (c.has("name")) {
+                    name =  c.getString("name");
+                }
+
+                if (c.has("abv")) {
+                    abv = c.getString("abv");
+                }
+
 
                 //description is nested
                 JSONObject style = c.getJSONObject("style");
-                String description = style.getString("description");
+
+                if (style.has("description")) {
+                    description = style.getString("description");
+                }
+
 //
 //                // Label is nested
 //                JSONObject label = c.getJSONObject("labels");
