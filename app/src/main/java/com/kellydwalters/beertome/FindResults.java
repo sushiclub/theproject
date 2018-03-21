@@ -15,7 +15,6 @@ import android.widget.ArrayAdapter;
 import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.squareup.picasso.Picasso;
 
@@ -25,8 +24,6 @@ import org.json.JSONObject;
 
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.Iterator;
-import java.util.List;
 
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
@@ -38,7 +35,7 @@ public class FindResults extends AppCompatActivity {
     private final String apiSearchType = "&type=beer&";
 
     private ListView mainListView ;
-    private ArrayList<ListItem> item = new ArrayList<>();
+    private ArrayList<ListItem> items = new ArrayList<>();
     CustomListView customListView;
 
     @Override
@@ -153,27 +150,27 @@ public class FindResults extends AppCompatActivity {
 //                beer.put("image", image);
 
 
-            // Creates a new list item for each call
-                ListItem x = new ListItem();
+//             Creates a new list items for each call
+                ListItem listItem = new ListItem();
 
-                x.setName(name);
-                x.setAbv(abv);
+                listItem.setName(name);
+                listItem.setAbv(abv);
 //                x.setImage(image);
 
-                item.add(x);
+                items.add(listItem);
 
                 ArrayList<String> titleList = new ArrayList<String>();
                 ArrayList<String> imageList = new ArrayList<String>();
                 ArrayList<String> abvList = new ArrayList<String>();
 
-                for(ListItem li: item){
+                for(ListItem li: items){
                     titleList.add(li.getName());
                     abvList.add(li.getAbv());
                     imageList.add(li.getImage());
                 }
 
                 // Resets the adapter after each request, so that everything is added
-                customListView = new CustomListView(FindResults.this, titleList, imageList, abvList);
+                customListView = new CustomListView(FindResults.this, titleList, abvList, imageList);
                 mainListView.setAdapter( customListView );
             }
         } catch (JSONException e) {
@@ -191,6 +188,9 @@ public class FindResults extends AppCompatActivity {
             this.title = title;
             this.context = context;
             this.abvValue = abvValue;
+            for (String s: abvValue) {
+                System.out.println("test: "+  s);
+            }
             this.image = image;
         }
 
