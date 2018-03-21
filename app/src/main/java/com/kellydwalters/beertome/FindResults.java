@@ -101,6 +101,7 @@ public class FindResults extends AppCompatActivity {
             String name = "n/a";
             String abv = "n/a";
             String description = "n/a";
+            String image = null;
 
             // get Data json object
             JSONArray jsonData = reader.getJSONArray("data");
@@ -127,8 +128,12 @@ public class FindResults extends AppCompatActivity {
 
 //
 //                // Label is nested
-//                JSONObject label = c.getJSONObject("labels");
-//                String image = label.getString("icon");
+                if (c.has("labels")) {
+                    JSONObject label = c.getJSONObject("labels");
+                    image = label.getString("medium");
+                }
+
+
 
 
 
@@ -147,7 +152,9 @@ public class FindResults extends AppCompatActivity {
                 beer.put("name", name);
                 beer.put("abv", abv);
                 beer.put("description", description);
-//                beer.put("image", image);
+                if (image != null) {
+                    beer.put("image", image);
+                }
 
 
 //             Creates a new list items for each call
@@ -155,7 +162,7 @@ public class FindResults extends AppCompatActivity {
 
                 listItem.setName(name);
                 listItem.setAbv(abv);
-//                x.setImage(image);
+                listItem.setImage(image);
 
                 items.add(listItem);
 
