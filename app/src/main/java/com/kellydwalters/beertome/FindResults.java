@@ -11,6 +11,7 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.ImageView;
 import android.widget.ListView;
@@ -51,7 +52,10 @@ public class FindResults extends AppCompatActivity {
         String url = apiURL + query + apiSearchType +  apiKey;
         FindResults.OkHttpHandler okHttpHandler= new FindResults.OkHttpHandler();
 
+
         okHttpHandler.execute(url);
+
+
     }
 
     public class OkHttpHandler extends AsyncTask {
@@ -82,8 +86,24 @@ public class FindResults extends AppCompatActivity {
             super.onPostExecute(o);
             Log.d("KELLLY", o.toString());
             parseResponse(o.toString());
+            setClickHandler();
 
         }
+    }
+
+    private void setClickHandler() {
+        mainListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                Log.d("kelly", "click!!");
+                Log.d("TAG", "onItemClick: "+ position);
+                Intent resultIntent = new Intent();
+                String message = "abc";
+                resultIntent.putExtra("test", message);
+                setResult(RESULT_OK, resultIntent);
+                finish();
+            }
+        });
     }
 
     private void parseResponse(String response) {
@@ -132,10 +152,6 @@ public class FindResults extends AppCompatActivity {
                     JSONObject label = c.getJSONObject("labels");
                     image = label.getString("medium");
                 }
-
-
-
-
 
                 // print out what we got
                 Log.d("KELLLY", name);
@@ -195,9 +211,6 @@ public class FindResults extends AppCompatActivity {
             this.title = title;
             this.context = context;
             this.abvValue = abvValue;
-            for (String s: abvValue) {
-                System.out.println("test: "+  s);
-            }
             this.image = image;
         }
 

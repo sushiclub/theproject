@@ -56,8 +56,9 @@ public class BeerEntry extends AppCompatActivity {
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
+        Log.d("RESULT_CODE", ""+ resultCode);
         if (resultCode == Activity.RESULT_OK){
-
+            Log.d("result", data.getStringExtra("test"));
 
         } else {
             //cancelled
