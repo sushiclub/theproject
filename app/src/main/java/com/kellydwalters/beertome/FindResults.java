@@ -1,32 +1,21 @@
 package com.kellydwalters.beertome;
 
-import android.app.Activity;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.AsyncTask;
-import android.support.annotation.NonNull;
-import android.support.annotation.Nullable;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
-import android.view.LayoutInflater;
 import android.view.View;
-import android.view.ViewGroup;
-import android.widget.ArrayAdapter;
-import android.widget.ImageView;
+import android.widget.AdapterView;
 import android.widget.ListView;
-import android.widget.TextView;
 import android.widget.Toast;
-
-import com.squareup.picasso.Picasso;
 
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.List;
 
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
@@ -41,10 +30,16 @@ public class FindResults extends AppCompatActivity {
     private ArrayList<ListItem> item = new ArrayList<>();
     CustomListView customListView;
 
+    SharedPreferences sharedPreferences;
+
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_find_results);
+
+//        sharedPreferences = getSharedPreferences("beers",0);
+
 
         // get the beer name from the intent passed in and set it to the query string
         Intent intent = getIntent();
@@ -85,8 +80,41 @@ public class FindResults extends AppCompatActivity {
             super.onPostExecute(o);
             Log.d("KELLLY", o.toString());
             parseResponse(o.toString());
+            setClickHandler();
 
         }
+    }
+
+    private void setClickHandler() {
+        mainListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                Log.d("KELLLY", "click!!");
+                Log.d("TAG", "onItemClick: "+ position);
+                Intent resultIntent = new Intent();
+                String message = "abc";
+                resultIntent.putExtra("test", message);
+
+                sharedPreferences = getSharedPreferences("beers",0);
+                SharedPreferences.Editor editor = sharedPreferences.edit();
+                editor.putString("name", item.get(position).getName());
+                editor.putString("abv", item.get(position).getAbv());
+                editor.putString("description", item.get(position).getDescription());
+                editor.putString("image", item.get(position).getImage());
+                Boolean success = editor.commit();
+
+
+                if (success) {
+                    setResult(RESULT_OK, resultIntent);
+
+                }
+                else{
+                    Toast.makeText(FindResults.this, "Data was NOT saved successfully", Toast.LENGTH_SHORT).show();
+                }
+//                setResult(RESULT_OK, resultIntent);
+                finish();
+            }
+        });
     }
 
     private void parseResponse(String response) {
@@ -101,6 +129,11 @@ public class FindResults extends AppCompatActivity {
             // image ['data'][i]['labels']['icon']
 
 
+            String name = "n/a";
+            String abv = "n/a";
+            String description = "n/a";
+            String image = null;
+
             // get Data json object
             JSONArray jsonData = reader.getJSONArray("data");
 
@@ -108,45 +141,43 @@ public class FindResults extends AppCompatActivity {
                 // get the main level of items
                 JSONObject c = jsonData.getJSONObject(i);
 
-                String name = c.getString("name");
-                String abv = c.getString("abv");
+                if (c.has("name")) {
+                    name =  c.getString("name");
+                }
+
+                if (c.has("abv")) {
+                    abv = c.getString("abv");
+                }
 
                 //description is nested
                 JSONObject style = c.getJSONObject("style");
-                String description = style.getString("description");
+
+                if (style.has("description")) {
+                    description = style.getString("description");
+                }
 //
 //                // Label is nested
-//                JSONObject label = c.getJSONObject("labels");
-//                String image = label.getString("icon");
-
+                if (c.has("labels")) {
+                    JSONObject label = c.getJSONObject("labels");
+                    image = label.getString("medium");
+                }
 
 
                 // print out what we got
                 Log.d("KELLLY", name);
                 Log.d("KELLLY", abv);
-//                Log.d("KELLLY", image);
+                Log.d("KELLLY", image);
                 Log.d("KELLLY", description);
 
 
-                // tmp hash map for single contact
-                HashMap<String, String> beer = new HashMap<>();
+                ListItem listItem = new ListItem();
 
-                // adding each child node to HashMap key => value
+                listItem.setName(name);
+                listItem.setAbv(abv);
+                listItem.setDescription(description);
+                listItem.setImage(image);
 
-                beer.put("name", name);
-                beer.put("abv", abv);
-                beer.put("description", description);
-//                beer.put("image", image);
-
-
-            // Creates a new list item for each call
-                ListItem x = new ListItem();
-
-                x.setName(name);
-                x.setAbv(abv);
-//                x.setImage(image);
-
-                item.add(x);
+                item.add(listItem);
 
                 ArrayList<String> titleList = new ArrayList<String>();
                 ArrayList<String> imageList = new ArrayList<String>();
@@ -159,61 +190,37 @@ public class FindResults extends AppCompatActivity {
                 }
 
                 // Resets the adapter after each request, so that everything is added
-                customListView = new CustomListView(FindResults.this, titleList, imageList, abvList);
+                customListView = new CustomListView(FindResults.this, titleList, abvList, imageList);
                 mainListView.setAdapter( customListView );
             }
+
         } catch (JSONException e) {
             e.printStackTrace();
         }
     }
 
-    public class CustomListView extends ArrayAdapter<String> {
-        private ArrayList<String> title, abvValue, image;
-        private Activity context;
-
-        public CustomListView(Activity context, ArrayList<String> title, ArrayList<String> abvValue,  ArrayList<String> image) {
-            super(context, R.layout.found_row, title);
-
-            this.title = title;
-            this.context = context;
-            this.abvValue = abvValue;
-            this.image = image;
-        }
-
-        @NonNull
-        @Override
-        public View getView(int position, @Nullable View convertView, @NonNull ViewGroup parent) {
-            ViewHolder vh = null;
-            if (convertView == null){
-                LayoutInflater inflater = context.getLayoutInflater();
-                convertView = inflater.inflate(R.layout.found_row, null, true);
-                vh = new ViewHolder(convertView);
-                convertView.setTag(vh);
-            } else {
-                vh = (ViewHolder)convertView.getTag();
-            }
-
-            vh.txtTitle.setText(title.get(position));
-            vh.tvABV.setText(abvValue.get(position));
-
-
-            // Loads the image via url into the image view
-            Picasso.get().load(image.get(position)).into(vh.image);
-
-            return convertView;
-        }
-
-        class ViewHolder {
-            TextView txtTitle, tvABV;
-            ImageView image;
-
-            ViewHolder (View v){
-                this.txtTitle = v.findViewById(R.id.tvName);
-                this.tvABV = v.findViewById(R.id.tvABV);
-                this.image = v.findViewById(R.id.imageView);
-
-            }
-        }
-    }
+//@Override
+//    public void onBackPressed() {
+////    int position
+//        SharedPreferences.Editor editor = sharedPreferences.edit();
+////        editor.putString("name", item.get(position).getName());
+////        editor.putString("abv", item.get(position).getAbv());
+////        editor.putString("description", item.get(position).getDescription());
+////        editor.putString("image", item.get(position).getImage());
+//
+//
+//        boolean success =  editor.commit();
+//        this.finish();
+//
+//        if (success) {
+//            setResult(this.RESULT_OK);
+//            Toast.makeText(this, "Data selected", Toast.LENGTH_SHORT).show();
+//        }
+//        else{
+//            Toast.makeText(FindResults.this, "Data was NOT saved successfully", Toast.LENGTH_SHORT).show();
+//        }
+//
+//        super.onBackPressed(); //calls this.finish
+//    }
 
 }

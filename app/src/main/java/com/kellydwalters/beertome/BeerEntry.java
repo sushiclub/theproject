@@ -2,6 +2,7 @@ package com.kellydwalters.beertome;
 
 import android.app.Activity;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.AsyncTask;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -20,9 +21,9 @@ import okhttp3.Response;
 
 public class BeerEntry extends AppCompatActivity {
 
-    private EditText etBeerName;
-
-    private Button btnFind, btnAddBeer;
+    private EditText etBeerName, etAbv, etDescription;
+    private SharedPreferences sharedPreferences;
+    
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -36,10 +37,13 @@ public class BeerEntry extends AppCompatActivity {
 
         //http://api.brewerydb.com/v2/search?q=<query name>&type=beer&key=ba3c926f89626f68edeb102cb57f0a93
 
+        sharedPreferences = getSharedPreferences("beers",0);
 
-        btnFind = findViewById(R.id.btnFind);
-        btnAddBeer = findViewById(R.id.btnAddBeer);
+        Button btnFind = findViewById(R.id.btnFind);
+        Button btnAddBeer = findViewById(R.id.btnSubmit);
         etBeerName = findViewById(R.id.etBeerName);
+        etAbv = findViewById(R.id.etABV);
+        etDescription =findViewById(R.id.etDescription);
 
 
         btnFind.setOnClickListener(new View.OnClickListener() {
@@ -50,14 +54,24 @@ public class BeerEntry extends AppCompatActivity {
                 startActivityForResult(intent, 0);
             }
         });
+        
+        btnAddBeer.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Toast.makeText(BeerEntry.this, "This will add the beer to the db", Toast.LENGTH_SHORT).show();
+            }
+        });
 
     }
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
-        if (resultCode == Activity.RESULT_OK){
 
+        if (resultCode == Activity.RESULT_OK){
+            etBeerName.setText(sharedPreferences.getString("name",""));
+            etAbv.setText(sharedPreferences.getString("abv",""));
+            etDescription.setText(sharedPreferences.getString("description",""));
 
         } else {
             //cancelled
