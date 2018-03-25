@@ -12,16 +12,10 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Toast;
 
-import org.json.JSONException;
-import org.json.JSONObject;
-
-import okhttp3.OkHttpClient;
-import okhttp3.Request;
-import okhttp3.Response;
 
 public class BeerEntry extends AppCompatActivity {
 
-    private EditText etBeerName, etAbv, etDescription;
+    private EditText etBeerName, etAbv, etDescription, etReview;
     private SharedPreferences sharedPreferences;
     
 
@@ -29,21 +23,13 @@ public class BeerEntry extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_beer_entry);
-        // Search query example
-//        search?q=kilkenny&type=beer&key= + apiKey
-
-        //this will be blank if the new button on main was pressed
-        // or filled with editable items if it is from the description page
-
-        //http://api.brewerydb.com/v2/search?q=<query name>&type=beer&key=ba3c926f89626f68edeb102cb57f0a93
-
-        sharedPreferences = getSharedPreferences("beers",0);
 
         Button btnFind = findViewById(R.id.btnFind);
         Button btnAddBeer = findViewById(R.id.btnSubmit);
         etBeerName = findViewById(R.id.etBeerName);
         etAbv = findViewById(R.id.etABV);
         etDescription =findViewById(R.id.etDescription);
+        etReview = findViewById(R.id.etReview);
 
 
         btnFind.setOnClickListener(new View.OnClickListener() {
@@ -69,15 +55,26 @@ public class BeerEntry extends AppCompatActivity {
         super.onActivityResult(requestCode, resultCode, data);
 
         if (resultCode == Activity.RESULT_OK){
-            etBeerName.setText(sharedPreferences.getString("name",""));
-            etAbv.setText(sharedPreferences.getString("abv",""));
-            etDescription.setText(sharedPreferences.getString("description",""));
+            // set text fields to selected beer data
+            etBeerName.setText(data.getStringExtra("name"));
+            etAbv.setText(data.getStringExtra("abv"));
+            etDescription.setText(data.getStringExtra("description"));
 
         } else {
+
+            clearTextFields();
+
             //cancelled
-            Toast.makeText(this, "It broke", Toast.LENGTH_SHORT).show();
-            Log.d("kelly", "it broke " );
+//            Toast.makeText(this, "It broke", Toast.LENGTH_SHORT).show();
+            Log.d("kelly", "Nothing selected " );
         }
+    }
+
+    private void clearTextFields(){
+        etAbv.setText("");
+        etDescription.setText("");
+        etReview.setText("");
+        // do the other things here as well so that a menu option can clear it too
     }
 
 }

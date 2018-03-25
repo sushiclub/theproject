@@ -38,9 +38,6 @@ public class FindResults extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_find_results);
 
-//        sharedPreferences = getSharedPreferences("beers",0);
-
-
         // get the beer name from the intent passed in and set it to the query string
         Intent intent = getIntent();
         String query = intent.getStringExtra("beerName");
@@ -91,27 +88,31 @@ public class FindResults extends AppCompatActivity {
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                 Log.d("KELLLY", "click!!");
                 Log.d("TAG", "onItemClick: "+ position);
+
                 Intent resultIntent = new Intent();
-                String message = "abc";
-                resultIntent.putExtra("test", message);
 
-                sharedPreferences = getSharedPreferences("beers",0);
-                SharedPreferences.Editor editor = sharedPreferences.edit();
-                editor.putString("name", item.get(position).getName());
-                editor.putString("abv", item.get(position).getAbv());
-                editor.putString("description", item.get(position).getDescription());
-                editor.putString("image", item.get(position).getImage());
-                Boolean success = editor.commit();
+                resultIntent.putExtra("name", item.get(position).getName());
+                resultIntent.putExtra("abv", item.get(position).getAbv());
+                resultIntent.putExtra("description", item.get(position).getDescription());
+                resultIntent.putExtra("image", item.get(position).getImage());
 
 
-                if (success) {
+//                sharedPreferences = getSharedPreferences("beers",0);
+//                SharedPreferences.Editor editor = sharedPreferences.edit();
+//                editor.putString("name", item.get(position).getName());
+//                editor.putString("abv", item.get(position).getAbv());
+//                editor.putString("description", item.get(position).getDescription());
+//                editor.putString("image", item.get(position).getImage());
+//                Boolean success = editor.commit();
+
+
+                if (resultIntent != null) {
                     setResult(RESULT_OK, resultIntent);
 
                 }
                 else{
                     Toast.makeText(FindResults.this, "Data was NOT saved successfully", Toast.LENGTH_SHORT).show();
                 }
-//                setResult(RESULT_OK, resultIntent);
                 finish();
             }
         });
@@ -122,7 +123,8 @@ public class FindResults extends AppCompatActivity {
 
             // Convert String to json object
             JSONObject reader = new JSONObject(response);
-//
+
+            // Nesting levels of nodes
             // for beer name: ['data'][i]['name']
             // for abv: ['data'][i]['abv']
             // description ['data'][0]['style']['description']
@@ -155,19 +157,17 @@ public class FindResults extends AppCompatActivity {
                 if (style.has("description")) {
                     description = style.getString("description");
                 }
-//
-//                // Label is nested
+
+                // Label is nested
                 if (c.has("labels")) {
                     JSONObject label = c.getJSONObject("labels");
                     image = label.getString("medium");
                 }
+                else {
+                    // grab a no image available url if there isn't one in the json
+                    image = "http://tutaki.org.nz/wp-content/uploads/2016/04/no-image-available.png";
+                }
 
-
-                // print out what we got
-                Log.d("KELLLY", name);
-                Log.d("KELLLY", abv);
-                Log.d("KELLLY", image);
-                Log.d("KELLLY", description);
 
 
                 ListItem listItem = new ListItem();
@@ -199,28 +199,14 @@ public class FindResults extends AppCompatActivity {
         }
     }
 
-//@Override
-//    public void onBackPressed() {
-////    int position
-//        SharedPreferences.Editor editor = sharedPreferences.edit();
-////        editor.putString("name", item.get(position).getName());
-////        editor.putString("abv", item.get(position).getAbv());
-////        editor.putString("description", item.get(position).getDescription());
-////        editor.putString("image", item.get(position).getImage());
-//
-//
-//        boolean success =  editor.commit();
-//        this.finish();
-//
-//        if (success) {
-//            setResult(this.RESULT_OK);
-//            Toast.makeText(this, "Data selected", Toast.LENGTH_SHORT).show();
-//        }
-//        else{
-//            Toast.makeText(FindResults.this, "Data was NOT saved successfully", Toast.LENGTH_SHORT).show();
-//        }
-//
-//        super.onBackPressed(); //calls this.finish
-//    }
+    @Override
+    public void onBackPressed() {
+
+        setResult(this.RESULT_CANCELED);
+        Toast.makeText(this, "No data selected", Toast.LENGTH_SHORT).show();
+
+
+        super.onBackPressed(); //calls this.finish
+    }
 
 }
