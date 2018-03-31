@@ -17,7 +17,9 @@ public class BeerEntry extends AppCompatActivity {
 
     private EditText etBeerName, etAbv, etDescription, etReview;
     private SharedPreferences sharedPreferences;
-    
+
+    // Database Helper
+    DatabaseHelper db;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -30,6 +32,8 @@ public class BeerEntry extends AppCompatActivity {
         etAbv = findViewById(R.id.etABV);
         etDescription =findViewById(R.id.etDescription);
         etReview = findViewById(R.id.etReview);
+
+        db = new DatabaseHelper(getApplicationContext());
 
 
         btnFind.setOnClickListener(new View.OnClickListener() {
